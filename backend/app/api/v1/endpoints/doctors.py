@@ -1,9 +1,9 @@
 from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.api import deps
-from app.db import models
-from app.schemas.appointment import Doctor as DoctorSchema
+from backend.app.api import deps
+from backend.app.db import models
+from backend.app.schemas.doctor import Doctor as DoctorSchema
 
 router = APIRouter()
 

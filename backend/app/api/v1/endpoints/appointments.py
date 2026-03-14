@@ -2,12 +2,12 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from app.api import deps
-from app.db import models
-from app.schemas.appointment import Appointment as AppointmentSchema, AppointmentCreate, QueueStatus
-from app.api.v1.websocket import manager
-from app.db.models import AppointmentStatus
-from app.services.ai_service import ai_service
+from backend.app.api import deps
+from backend.app.db import models
+from backend.app.schemas.appointment import Appointment as AppointmentSchema, AppointmentCreate, QueueStatus
+from backend.app.api.v1.websocket import manager
+from backend.app.db.models import AppointmentStatus
+from backend.app.services.ai_service import ai_service
 from datetime import datetime
 
 router = APIRouter()

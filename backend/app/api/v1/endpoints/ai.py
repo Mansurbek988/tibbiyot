@@ -1,7 +1,8 @@
 from typing import Any
 from fastapi import APIRouter, Depends
-from app.api import deps
-from app.services.ai_service import ai_service
+from backend.app.api import deps
+from backend.app.services.ai_service import ai_service
+from backend.app.db import models
 from pydantic import BaseModel
 
 router = APIRouter()

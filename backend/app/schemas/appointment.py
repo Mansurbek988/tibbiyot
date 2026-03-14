@@ -1,7 +1,8 @@
 from typing import Optional, List
 from pydantic import BaseModel
+from backend.app.db.models import AppointmentStatus
 from datetime import datetime
-from app.schemas.user import User
+from backend.app.schemas.user import User
 
 # --- Doctor Schemas ---
 class DoctorBase(BaseModel):
