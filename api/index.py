@@ -9,50 +9,51 @@ root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if root_path not in sys.path:
     sys.path.insert(0, root_path)
 
+app = FastAPI()
+
+@app.get("/health")
+@app.get("/api/health")
+@app.get("/api/v1/health")
+async def health_check():
+    import os
+    # We try to import settings but if it fails we still want to see the env vars
+    status_info = {
+        "status": "ok",
+        "env_diagnostics": {
+            "DATABASE_URL_SET": "DATABASE_URL" in os.environ,
+            "POSTGRES_URL_SET": "POSTGRES_URL" in os.environ,
+            "AVAILABLE_DATABASE_KEYS": [k for k in os.environ.keys() if "DATABASE" in k or "POSTGRES" in k],
+            "PYTHON_PATH": sys.path
+        }
+    }
+    
+    try:
+        from backend.app.core.config import settings
+        raw_url = settings.SQLALCHEMY_DATABASE_URI
+        status_info["database_configured_uri"] = raw_url.split("@")[-1] if "@" in raw_url else "no-user-info"
+        status_info["is_localhost"] = "localhost" in raw_url or "127.0.0.1" in raw_url
+    except Exception as e:
+        status_info["settings_error"] = str(e)
+        
+    return status_info
+
 try:
     from backend.app.main import app as backend_app
-    app = backend_app
-    
-    # Add diagnostic health check directly to the backend app
-    @app.get("/health")
-    @app.get("/api/health")
-    async def health_diagnostics():
-        import os
-        from backend.app.core.config import settings
-        
-        raw_url = settings.SQLALCHEMY_DATABASE_URI
-        masked_url = raw_url
-        if "@" in raw_url:
-            parts = raw_url.split("@")
-            prefix = parts[0]
-            if ":" in prefix:
-                subparts = prefix.split(":")
-                # Mask password
-                masked_url = f"{subparts[0]}:{subparts[1]}:****@{parts[1]}"
-        
-        return {
-            "status": "ok",
-            "database_detected": bool(os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")),
-            "is_localhost": "localhost" in raw_url or "127.0.0.1" in raw_url,
-            "connection_uri_masked": masked_url,
-            "env_vars_present": [k for k in os.environ.keys() if "DATABASE" in k or "POSTGRES" in k],
-            "message": "Backend is active"
-        }
-
+    # Mount the real app
+    app.mount("/", backend_app)
 except Exception as e:
-    app = FastAPI()
     error_msg = str(e)
     stack_trace = traceback.format_exc()
     
     @app.api_route("/{rest_of_path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
     async def caught_error(request: Request, rest_of_path: str):
+        if "health" in rest_of_path:
+            return await health_check()
         return JSONResponse(
             status_code=500,
             content={
                 "error": "Failed to load backend app",
                 "detail": error_msg,
-                "traceback": stack_trace,
-                "requested_path": rest_of_path,
-                "method": request.method
+                "traceback": stack_trace
             }
         )
