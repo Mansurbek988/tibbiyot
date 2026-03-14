@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 
 # Biz hozircha declarative_base ni app.db.database faylidan import qilib olamiz deb faraz qilamiz
 # Lekin chigallik bo'lmasligi uchun pastda o'zimiz yaratishimiz ham mumkin.
-from app.db.database import Base
+from backend.app.db.database import Base
 
 class RoleEnum(enum.Enum):
     PATIENT = "patient"

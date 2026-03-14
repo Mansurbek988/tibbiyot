@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr
-from app.db.models import RoleEnum
+from backend.app.db.models import RoleEnum
 
 # Shared properties
 class UserBase(BaseModel):

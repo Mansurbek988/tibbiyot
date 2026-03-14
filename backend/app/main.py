@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
-from app.db.database import engine
-from app.db import models
+from backend.app.core.config import settings
+from backend.app.db.database import engine
+from backend.app.db import models
 from typing import Optional
-from app.api.v1.api import api_router
+from backend.app.api.v1.api import api_router
 
 # In a real production app, you would use Alembic for migrations instead of this
 models.Base.metadata.create_all(bind=engine)
