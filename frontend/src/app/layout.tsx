@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -20,19 +21,19 @@ export default function RootLayout({
         <nav className="nav-blur">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
-              <div className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-xl">+</span>
                 </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
                   SmartMed Queue
                 </span>
-              </div>
+              </Link>
               <div className="hidden md:flex items-center space-x-8">
-                <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">Bosh sahifa</a>
-                <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">Shifokorlar</a>
-                <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">Navbatlarim</a>
-                <button className="btn-primary">Kirish</button>
+                <Link href="/" className="text-gray-600 hover:text-blue-600 transition-colors">Bosh sahifa</Link>
+                <Link href="/doctors" className="text-gray-600 hover:text-blue-600 transition-colors">Shifokorlar</Link>
+                <Link href="/my-queues" className="text-gray-600 hover:text-blue-600 transition-colors">Navbatlarim</Link>
+                <Link href="/auth/login" className="btn-primary">Kirish</Link>
               </div>
             </div>
           </div>
