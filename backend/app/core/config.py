@@ -19,15 +19,26 @@ class Settings(BaseSettings):
     
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        db_url = self.DATABASE_URL or self.POSTGRES_URL
+        import os
+        # Prioritize env vars directly in case Pydantic didn't pick them up
+        db_url = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL") or self.DATABASE_URL or self.POSTGRES_URL
+        
         if db_url:
             # Handle postgresql:// vs postgres://
-            url = db_url.replace("postgres://", "postgresql://", 1)
-            # Add sslmode=require if not present and not localhost
-            if "localhost" not in url and "127.0.0.1" not in url and "sslmode" not in url:
-                separator = "&" if "?" in url else "?"
-                url += f"{separator}sslmode=require"
-            return url
+            if db_url.startswith("postgres://"):
+                db_url = db_url.replace("postgres://", "postgresql://", 1)
+            
+            # Remove any trailing slash and add sslmode=require if needed
+            url = db_url.split("?")[0]
+            params = db_url.split("?")[1] if "?" in db_url else ""
+            
+            if "localhost" not in url and "127.0.0.1" not in url:
+                if "sslmode=require" not in params:
+                    separator = "&" if params else "?"
+                    db_url = f"{url}{separator}{params}{'&' if params else ''}sslmode=require"
+            
+            return db_url
+            
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     class Config:
