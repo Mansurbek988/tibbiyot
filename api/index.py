@@ -9,25 +9,26 @@ app = FastAPI()
 @app.get("/api/v1/health")
 @app.get("/health")
 async def health():
-    # Diagnostic: check for any files that still have "from app"
     bad_files = []
     root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    for root_dir, dirs, files in os.walk(os.path.join(root, "backend")):
-        for file in files:
-            if file.endswith(".py"):
-                path = os.path.join(root_dir, file)
-                try:
-                    with open(path, "r", encoding="utf-8") as f:
-                        content = f.read()
-                        if "from app." in content or "import app." in content:
-                            bad_files.append(path.replace(root, ""))
-                except:
-                    pass
-    
+    backend_root = os.path.join(root, "backend")
+    if os.path.exists(backend_root):
+        for root_dir, dirs, files in os.walk(backend_root):
+            for file in files:
+                if file.endswith(".py"):
+                    path = os.path.join(root_dir, file)
+                    try:
+                        with open(path, "r", encoding="utf-8") as f:
+                            content = f.read()
+                            if "from app." in content or "from app " in content or "import app." in content:
+                                bad_files.append(path.replace(root, ""))
+                    except Exception as e:
+                        pass
     return {
         "status": "diagnostic",
-        "bad_files_found": bad_files,
-        "message": "Check bad_files_found list and fix them"
+        "bad_files": bad_files,
+        "checked_path": backend_root,
+        "exists": os.path.exists(backend_root)
     }
 
 # Add the root directory to the path so we can import 'backend'
