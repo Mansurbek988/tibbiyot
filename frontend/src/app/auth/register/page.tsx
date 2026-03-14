@@ -9,7 +9,7 @@ import Link from "next/link";
 
 export default function RegisterPage() {
     const [fullName, setFullName] = useState("");
-    const [email, setEmail] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -23,7 +23,7 @@ export default function RegisterPage() {
         try {
             await authService.register({
                 full_name: fullName,
-                email: email,
+                phone_number: phoneNumber,
                 password: password,
             });
             // After registration, redirect to login
@@ -73,12 +73,12 @@ export default function RegisterPage() {
                     <div className="relative">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                         <input
-                            type="email"
+                            type="text"
                             required
-                            placeholder="Email manzilingiz"
+                            placeholder="Telefon raqamingiz"
                             className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
                         />
                     </div>
 

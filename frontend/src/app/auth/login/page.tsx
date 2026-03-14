@@ -8,7 +8,7 @@ import { Mail, Lock, LogIn, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
-    const [email, setEmail] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -21,14 +21,14 @@ export default function LoginPage() {
 
         try {
             const formData = new FormData();
-            formData.append("username", email); // FastAPI uses 'username' for OAuth2
+            formData.append("username", phoneNumber); // FastAPI uses 'username' for OAuth2, we pass phone_number
             formData.append("password", password);
 
             const response = await authService.login(formData);
             localStorage.setItem("token", response.data.access_token);
             router.push("/my-queues");
         } catch (err: any) {
-            setError(err.response?.data?.detail || "Email yoki parol xato");
+            setError(err.response?.data?.detail || "Telefon raqam yoki parol xato");
         } finally {
             setLoading(false);
         }
@@ -60,12 +60,12 @@ export default function LoginPage() {
                     <div className="relative">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                         <input
-                            type="email"
+                            type="text"
                             required
-                            placeholder="Email manzilingiz"
+                            placeholder="Telefon raqamingiz"
                             className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
                         />
                     </div>
 
