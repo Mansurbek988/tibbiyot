@@ -1,30 +1,30 @@
-import sys
-import os
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 
-# Add the root directory to the path so we can import 'backend'
-path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if path not in sys.path:
-    sys.path.insert(0, path)
+app = FastAPI()
 
+@app.get("/health")
+async def health():
+    return {"status": "ok", "message": "Minimal API is working"}
+
+@app.get("/debug")
+async def debug():
+    import os
+    import sys
+    return {
+        "cwd": os.getcwd(),
+        "sys_path": sys.path,
+        "files_in_root": os.listdir("..") if os.path.exists("..") else "root not found",
+        "files_in_current": os.listdir(".")
+    }
+
+# Try to import for the real app to see if it even can
 try:
-    from backend.app.main import app
+    from backend.app.main import app as real_app
+    app.mount("/real", real_app)
 except Exception as e:
     import traceback
-    from fastapi import FastAPI
-    from fastapi.responses import JSONResponse
-    
-    app = FastAPI()
-    
-    @app.get("/{rest_of_path:path}")
-    async def caught_error(rest_of_path: str):
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": "Failed to import backend",
-                "detail": str(e),
-                "traceback": traceback.format_exc(),
-                "sys_path": sys.path,
-                "current_dir": os.getcwd(),
-                "files": os.listdir(os.getcwd()) if os.path.exists(os.getcwd()) else []
-            }
-        )
+    error_info = {"error": str(e), "traceback": traceback.format_exc()}
+    @app.get("/error")
+    async def get_error():
+        return error_info
