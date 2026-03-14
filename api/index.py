@@ -13,14 +13,14 @@ try:
     from backend.app.main import app as backend_app
     app = backend_app
     
-    # Add a root-level health check to the backend app dynamically 
-    # so the Vercel rewrite for /health works
-    @app.get("/health")
-    async def health_proxy():
-        return {"status": "ok", "message": "Backend is active (via /health)"}
+    # Ensure /health works directly on the backend app
+    @app.get("/health", tags=["health"])
+    @app.get("/api/health", tags=["health"])
+    async def health_check_proxy():
+        return {"status": "ok", "message": "Backend is active and loaded"}
 
 except Exception as e:
-    # If import fails, use a fallback app to report errors
+    # Fallback app for error reporting
     app = FastAPI()
     error_msg = str(e)
     stack_trace = traceback.format_exc()
@@ -34,6 +34,7 @@ except Exception as e:
                 "detail": error_msg,
                 "traceback": stack_trace,
                 "requested_path": rest_of_path,
-                "method": request.method
+                "method": request.method,
+                "sys_path": sys.path
             }
         )
