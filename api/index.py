@@ -13,14 +13,33 @@ try:
     from backend.app.main import app as backend_app
     app = backend_app
     
-    # Ensure /health works directly on the backend app
-    @app.get("/health", tags=["health"])
-    @app.get("/api/health", tags=["health"])
-    async def health_check_proxy():
-        return {"status": "ok", "message": "Backend is active and loaded"}
+    # Add diagnostic health check directly to the backend app
+    @app.get("/health")
+    @app.get("/api/health")
+    async def health_diagnostics():
+        import os
+        from backend.app.core.config import settings
+        
+        raw_url = settings.SQLALCHEMY_DATABASE_URI
+        masked_url = raw_url
+        if "@" in raw_url:
+            parts = raw_url.split("@")
+            prefix = parts[0]
+            if ":" in prefix:
+                subparts = prefix.split(":")
+                # Mask password
+                masked_url = f"{subparts[0]}:{subparts[1]}:****@{parts[1]}"
+        
+        return {
+            "status": "ok",
+            "database_detected": bool(os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")),
+            "is_localhost": "localhost" in raw_url or "127.0.0.1" in raw_url,
+            "connection_uri_masked": masked_url,
+            "env_vars_present": [k for k in os.environ.keys() if "DATABASE" in k or "POSTGRES" in k],
+            "message": "Backend is active"
+        }
 
 except Exception as e:
-    # Fallback app for error reporting
     app = FastAPI()
     error_msg = str(e)
     stack_trace = traceback.format_exc()
@@ -34,7 +53,6 @@ except Exception as e:
                 "detail": error_msg,
                 "traceback": stack_trace,
                 "requested_path": rest_of_path,
-                "method": request.method,
-                "sys_path": sys.path
+                "method": request.method
             }
         )
