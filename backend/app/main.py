@@ -10,7 +10,10 @@ from backend.app.api import deps
 from sqlalchemy.orm import Session
 
 # In a real production app, you would use Alembic for migrations instead of this
-models.Base.metadata.create_all(bind=engine)
+try:
+    models.Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Database sync error: {e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
