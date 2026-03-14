@@ -89,6 +89,24 @@ def read_my_appointments(
     ).all()
     return appointments
 
+@router.get("/doctor-queue", response_model=List[AppointmentSchema])
+def read_doctor_queue(
+    db: Session = Depends(deps.get_db),
+    current_doctor: models.User = Depends(deps.get_doctor),
+) -> Any:
+    """
+    Retrieve current doctor's appointments.
+    """
+    doctor = db.query(models.Doctor).filter(models.Doctor.user_id == current_doctor.id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+        
+    appointments = db.query(models.Appointment).filter(
+        models.Appointment.doctor_id == doctor.id,
+        models.Appointment.status == AppointmentStatus.IN_QUEUE
+    ).all()
+    return appointments
+
 # --- WebSocket Endpoint ---
 @router.websocket("/ws/{doctor_id}")
 async def queue_websocket(websocket: WebSocket, doctor_id: int):

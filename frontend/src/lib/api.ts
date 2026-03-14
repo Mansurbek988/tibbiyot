@@ -21,6 +21,7 @@ apiClient.interceptors.request.use((config) => {
 export const authService = {
     login: (formData: FormData) => apiClient.post("/auth/login", formData),
     register: (userData: any) => apiClient.post("/auth/register", userData),
+    getMe: () => apiClient.get("/auth/me"),
 };
 
 export const aiService = {
@@ -35,6 +36,7 @@ export const appointmentService = {
     book: (doctorId: number, scheduledTime?: string) =>
         apiClient.post("/appointments/book", { doctor_id: doctorId, scheduled_time: scheduledTime }),
     getMyAppointments: () => apiClient.get("/appointments/my"),
+    getDoctorQueue: () => apiClient.get("/appointments/doctor-queue"),
 };
 
 export default apiClient;

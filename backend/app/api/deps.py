@@ -31,10 +31,24 @@ def get_current_user(
         token_data = TokenPayload(**payload)
     except (jwt.JWTError, ValidationError):
         raise HTTPException(
-            status_code=status.HTTP_03_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
     user = db.query(models.User).filter(models.User.id == token_data.sub).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+def check_role(roles: list[models.RoleEnum]):
+    def role_checker(current_user: models.User = Depends(get_current_user)):
+        if current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Sizda ushbu amalni bajarish uchun huquq yo'q",
+            )
+        return current_user
+    return role_checker
+
+get_admin = check_role([models.RoleEnum.ADMIN])
+get_doctor = check_role([models.RoleEnum.DOCTOR])
+get_any_staff = check_role([models.RoleEnum.ADMIN, models.RoleEnum.DOCTOR])
