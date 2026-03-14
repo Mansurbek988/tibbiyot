@@ -31,4 +31,17 @@ def read_root():
         "status": "Healthy"
     }
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "message": "SmartMed API is running"}
+
+@app.get("/api/v1/db-status")
+def db_status(db: Session = Depends(deps.get_db)):
+    try:
+        from sqlalchemy import text
+        db.execute(text("SELECT 1"))
+        return {"status": "connected", "database": settings.POSTGRES_DB}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 app.include_router(api_router, prefix=settings.API_V1_STR)
