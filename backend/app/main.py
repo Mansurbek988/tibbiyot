@@ -41,14 +41,30 @@ def read_root():
 def health_check():
     return {"status": "ok", "message": "SmartMed API is running"}
 
-@app.get("/api/v1/db-status")
-def db_status(db: Session = Depends(deps.get_db)):
-    try:
-        from sqlalchemy import text
-        db.execute(text("SELECT 1"))
-        return {"status": "connected", "database": settings.POSTGRES_DB}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+@app.get("/api/v1/db-debug")
+def db_debug():
+    import os
+    env_vars = {
+        "DATABASE_URL_SET": bool(os.getenv("DATABASE_URL")),
+        "POSTGRES_URL_SET": bool(os.getenv("POSTGRES_URL")),
+        "POSTGRES_SERVER": settings.POSTGRES_SERVER,
+        "ENV_KEYS": list(os.environ.keys())
+    }
+    
+    raw_url = settings.SQLALCHEMY_DATABASE_URI
+    # Mask password for safety
+    masked_url = raw_url
+    if "@" in raw_url:
+        prefix = raw_url.split("@")[0]
+        if ":" in prefix:
+            parts = prefix.split(":")
+            masked_url = f"{parts[0]}:{parts[1]}:****@{raw_url.split('@')[1]}"
+            
+    return {
+        "env_diagnostics": env_vars,
+        "final_uri_masked": masked_url,
+        "is_localhost": "localhost" in raw_url or "127.0.0.1" in raw_url
+    }
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
