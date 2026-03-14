@@ -14,12 +14,14 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "smartmed_db"
     POSTGRES_PORT: str = "5432"
     DATABASE_URL: Optional[str] = None
+    POSTGRES_URL: Optional[str] = None
     
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        if self.DATABASE_URL:
+        db_url = self.DATABASE_URL or self.POSTGRES_URL
+        if db_url:
             # Handle postgresql:// vs postgres:// (Vercel/Heroku common issue)
-            return self.DATABASE_URL.replace("postgres://", "postgresql://", 1)
+            return db_url.replace("postgres://", "postgresql://", 1)
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     class Config:

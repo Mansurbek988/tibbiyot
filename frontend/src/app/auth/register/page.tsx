@@ -21,15 +21,21 @@ export default function RegisterPage() {
         setError("");
 
         try {
-            await authService.register({
+            const response = await authService.register({
                 full_name: fullName,
                 phone_number: phoneNumber,
                 password: password,
             });
+            console.log("Registration successful:", response.data);
             // After registration, redirect to login
             router.push("/auth/login?registered=true");
         } catch (err: any) {
-            setError(err.response?.data?.detail || "Ro'yxatdan o'tishda xatolik yuz berdi");
+            console.error("Registration error:", err);
+            const detail = err.response?.data?.detail;
+            const message = typeof detail === 'string' ? detail :
+                Array.isArray(detail) ? detail[0]?.msg :
+                    "Ro'yxatdan o'tishda xatolik yuz berdi";
+            setError(message);
         } finally {
             setLoading(false);
         }
