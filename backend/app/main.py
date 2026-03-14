@@ -34,7 +34,7 @@ def read_root():
         "status": "Healthy"
     }
 
-@app.get("/health")
+@app.get("/api/v1/health")
 def health_check():
     return {"status": "ok", "message": "SmartMed API is running"}
 
