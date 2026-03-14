@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.app.api import deps
 from backend.app.db import models
-from backend.app.schemas.doctor import Doctor as DoctorSchema
+from backend.app.schemas.appointment import Doctor as DoctorSchema
 
 router = APIRouter()
 
