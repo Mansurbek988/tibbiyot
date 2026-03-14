@@ -16,12 +16,22 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str = "5432"
     DATABASE_URL: Optional[str] = None
     POSTGRES_URL: Optional[str] = None
+    POSTGRES_URL_NON_POOLING: Optional[str] = None
+    POSTGRES_PRISMA_URL: Optional[str] = None
     
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
         import os
         # Prioritize env vars directly in case Pydantic didn't pick them up
-        db_url = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL") or self.DATABASE_URL or self.POSTGRES_URL
+        db_url = (
+            os.getenv("POSTGRES_URL") or 
+            os.getenv("POSTGRES_URL_NON_POOLING") or 
+            os.getenv("DATABASE_URL") or 
+            os.getenv("POSTGRES_PRISMA_URL") or
+            self.POSTGRES_URL or 
+            self.POSTGRES_URL_NON_POOLING or
+            self.DATABASE_URL
+        )
         
         if db_url:
             # Handle postgresql:// vs postgres://
