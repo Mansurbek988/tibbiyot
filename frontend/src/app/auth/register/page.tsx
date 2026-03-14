@@ -30,11 +30,27 @@ export default function RegisterPage() {
             // After registration, redirect to login
             router.push("/auth/login?registered=true");
         } catch (err: any) {
-            console.error("Registration error:", err);
+            console.error("Registration error details:", err);
+            const status = err.response?.status;
             const detail = err.response?.data?.detail;
-            const message = typeof detail === 'string' ? detail :
-                Array.isArray(detail) ? detail[0]?.msg :
-                    "Ro'yxatdan o'tishda xatolik yuz berdi";
+            const traceback = err.response?.data?.traceback;
+
+            let message = "Ro'yxatdan o'tishda xatolik yuz berdi";
+
+            if (status === 404) {
+                message = "API topilmadi (404). Backend ulanishini tekshiring.";
+            } else if (typeof detail === 'string') {
+                message = detail;
+            } else if (Array.isArray(detail)) {
+                message = detail[0]?.msg || JSON.stringify(detail);
+            } else if (status) {
+                message = `Xatolik yuz berdi (Status: ${status})`;
+            }
+
+            if (traceback) {
+                console.error("Backend Traceback:", traceback);
+            }
+
             setError(message);
         } finally {
             setLoading(false);
