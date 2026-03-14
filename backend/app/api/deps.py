@@ -9,6 +9,7 @@ from backend.app.core import security
 from backend.app.core.config import settings
 from backend.app.db.database import SessionLocal
 from backend.app.schemas.token import TokenPayload
+from backend.app.db import models
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/login"
@@ -23,7 +24,7 @@ def get_db() -> Generator:
 
 def get_current_user(
     db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
-) -> models.User:
+) -> "models.User":
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]

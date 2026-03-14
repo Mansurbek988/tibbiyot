@@ -20,8 +20,13 @@ class Settings(BaseSettings):
     def SQLALCHEMY_DATABASE_URI(self) -> str:
         db_url = self.DATABASE_URL or self.POSTGRES_URL
         if db_url:
-            # Handle postgresql:// vs postgres:// (Vercel/Heroku common issue)
-            return db_url.replace("postgres://", "postgresql://", 1)
+            # Handle postgresql:// vs postgres://
+            url = db_url.replace("postgres://", "postgresql://", 1)
+            # Add sslmode=require if not present and not localhost
+            if "localhost" not in url and "127.0.0.1" not in url and "sslmode" not in url:
+                separator = "&" if "?" in url else "?"
+                url += f"{separator}sslmode=require"
+            return url
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     class Config:

@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.core.config import settings
 from backend.app.db.database import engine
@@ -45,3 +46,13 @@ def db_status(db: Session = Depends(deps.get_db)):
         return {"status": "error", "message": str(e)}
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    import traceback
+    print(f"GLOBAL ERROR: {str(exc)}")
+    print(traceback.format_exc())
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Server error: {str(exc)}", "traceback": traceback.format_exc() if "localhost" in str(request.url) else None},
+    )
