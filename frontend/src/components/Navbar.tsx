@@ -17,7 +17,10 @@ export default function Navbar() {
                     const response = await authService.getMe();
                     const userData = response.data;
                     console.log("Navbar fetched user:", userData);
-                    if (isMounted) setUser(userData);
+                    // Ensure userData is an object and has required fields
+                    if (isMounted && userData && typeof userData === 'object' && userData.role) {
+                        setUser(userData);
+                    }
                 }
             } catch (err) {
                 console.warn("User fetch error:", err);
@@ -57,7 +60,7 @@ export default function Navbar() {
                 margin: '0 auto',
                 padding: '0 20px',
                 display: 'flex',
-                justifyContent: 'between', // This looks like a bug (should be space-between) but keeping as is for now unless I fix it
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 height: '70px'
             }}>

@@ -42,70 +42,70 @@ export default function AddDoctor() {
     };
 
     return (
-        <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
+        <div className="min-h-screen bg-gray-50 font-sans">
             <Navbar />
-            <main style={{ maxWidth: '600px', margin: '40px auto', padding: '0 20px' }}>
-                <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-                    <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#111827', marginBottom: '8px' }}>Yangi Shifokor Qo'shish</h1>
-                    <p style={{ color: '#6b7280', marginBottom: '32px' }}>Tizimga yangi mutaxassisni ro'yxatdan o'tkazing</p>
+            <main className="max-w-2xl mx-auto px-4 py-12">
+                <div className="bg-white p-10 rounded-3xl shadow-xl border border-gray-100">
+                    <h1 className="text-3xl font-black text-gray-900 mb-2">Yangi Shifokor Qo'shish</h1>
+                    <p className="text-gray-500 mb-10">Tizimga yangi mutaxassisni ro'yxatdan o'tkazing</p>
 
                     {error && (
-                        <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fee2e2', color: '#b91c1c', padding: '12px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px' }}>
+                        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl mb-8 text-sm font-medium">
                             {error}
                         </div>
                     )}
 
                     {success && (
-                        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #dcfce7', color: '#15803d', padding: '12px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px' }}>
+                        <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-2xl mb-8 text-sm font-medium">
                             Shifokor muvaffaqiyatli qo'shildi! Dashboardga yo'naltirilmoqda...
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>To'liq Ism Sharif</label>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">To'liq Ism Sharif</label>
                             <input
                                 required
                                 type="text"
                                 placeholder="Masalan: Dr. Alisher Vohidov"
+                                className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all"
                                 value={formData.full_name}
                                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #d1d5db', fontSize: '16px', outline: 'none' }}
                             />
                         </div>
 
                         <div>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Telefon Raqam</label>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Telefon Raqam</label>
                             <input
                                 required
                                 type="text"
                                 placeholder="998901234567"
+                                className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all"
                                 value={formData.phone_number}
                                 onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #d1d5db', fontSize: '16px', outline: 'none' }}
                             />
                         </div>
 
                         <div>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Parol (Login uchun)</label>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Parol (Login uchun)</label>
                             <input
                                 required
                                 type="password"
                                 placeholder="********"
+                                className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #d1d5db', fontSize: '16px', outline: 'none' }}
                             />
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Mutaxassislik</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Mutaxassislik</label>
                                 <select
                                     required
+                                    className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all appearance-none"
                                     value={formData.specialization}
                                     onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #d1d5db', fontSize: '16px', backgroundColor: 'white' }}
                                 >
                                     <option value="">Tanlang</option>
                                     <option value="Cardiologist">Kardiolog</option>
@@ -118,13 +118,13 @@ export default function AddDoctor() {
                                 </select>
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Kutish Vaqti (min)</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Kutish Vaqti (min)</label>
                                 <input
                                     required
                                     type="number"
-                                    value={formData.avg_consultation_time}
-                                    onChange={(e) => setFormData({ ...formData, avg_consultation_time: parseInt(e.target.value) })}
-                                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #d1d5db', fontSize: '16px' }}
+                                    className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all"
+                                    value={formData.avg_consultation_time || ''}
+                                    onChange={(e) => setFormData({ ...formData, avg_consultation_time: parseInt(e.target.value) || 0 })}
                                 />
                             </div>
                         </div>
@@ -132,18 +132,7 @@ export default function AddDoctor() {
                         <button
                             disabled={loading}
                             type="submit"
-                            style={{
-                                backgroundColor: '#2563eb',
-                                color: 'white',
-                                padding: '14px',
-                                borderRadius: '12px',
-                                fontSize: '16px',
-                                fontWeight: '700',
-                                border: 'none',
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                                marginTop: '12px',
-                                opacity: loading ? 0.7 : 1
-                            }}
+                            className="w-full bg-blue-600 text-white py-4 rounded-2xl text-lg font-black hover:bg-blue-700 disabled:opacity-50 transition-all shadow-lg shadow-blue-100"
                         >
                             {loading ? "Yaratilmoqda..." : "Shifokorni Saqlash"}
                         </button>
