@@ -16,7 +16,9 @@ def read_doctors(
     """
     Retrieve doctors.
     """
-    doctors = db.query(models.Doctor).options(joinedload(models.Doctor.user)).offset(skip).limit(limit).all()
+    query = db.query(models.Doctor).options(joinedload(models.Doctor.user))
+    doctors = query.offset(skip).limit(limit).all()
+    print(f"DEBUG: Found {len(doctors)} doctors in DB")
     return doctors
 
 @router.get("/{id}", response_model=DoctorSchema)
