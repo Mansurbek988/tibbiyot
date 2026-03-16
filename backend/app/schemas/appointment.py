@@ -12,6 +12,11 @@ class DoctorBase(BaseModel):
 class DoctorCreate(DoctorBase):
     user_id: int
 
+class DoctorCreateRequest(BaseModel):
+    user_in: UserCreate
+    specialization: str
+    avg_consultation_time: int = 15
+
 class Doctor(DoctorBase):
     id: int
     user: User

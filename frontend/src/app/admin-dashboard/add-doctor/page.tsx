@@ -35,7 +35,12 @@ export default function AddDoctor() {
             setSuccess(true);
             setTimeout(() => router.push("/admin-dashboard"), 2000);
         } catch (err: any) {
-            setError(err.response?.data?.detail || "Shifokor qo'shishda xatolik yuz berdi");
+            const detail = err.response?.data?.detail;
+            if (Array.isArray(detail)) {
+                setError(detail[0]?.msg || "Ma'lumotlar xato yuborildi");
+            } else {
+                setError(detail || "Shifokor qo'shishda xatolik yuz berdi");
+            }
         } finally {
             setLoading(false);
         }

@@ -23,7 +23,12 @@ export default function AdminDashboard() {
                 const response = await adminService.getStats();
                 setStats(response.data);
             } catch (err: any) {
-                setError(err.response?.data?.detail || "Statistikalarni yuklashda xatolik");
+                const detail = err.response?.data?.detail;
+                if (Array.isArray(detail)) {
+                    setError(detail[0]?.msg || "Statistikalarni yuklashda xatolik");
+                } else {
+                    setError(detail || "Statistikalarni yuklashda xatolik");
+                }
                 console.error(err);
             } finally {
                 setLoading(false);

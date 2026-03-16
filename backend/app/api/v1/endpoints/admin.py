@@ -5,7 +5,7 @@ from backend.app.api import deps
 from backend.app.db import models
 from backend.app.core import security
 from backend.app.schemas.user import User as UserSchema, UserCreate
-from backend.app.schemas.appointment import DoctorCreate, Doctor as DoctorSchema
+from backend.app.schemas.appointment import DoctorCreate, Doctor as DoctorSchema, DoctorCreateRequest
 from sqlalchemy import func
 
 router = APIRouter()
@@ -14,14 +14,13 @@ router = APIRouter()
 def create_doctor(
     *,
     db: Session = Depends(deps.get_db),
-    user_in: UserCreate,
-    specialization: str,
-    avg_consultation_time: int = 15,
+    doctor_in: DoctorCreateRequest,
     current_user: models.User = Depends(deps.get_admin),
 ) -> Any:
     """
     Admin only: Create a new doctor user and their doctor profile.
     """
+    user_in = doctor_in.user_in
     user = db.query(models.User).filter(models.User.phone_number == user_in.phone_number).first()
     if user:
         raise HTTPException(
@@ -44,8 +43,8 @@ def create_doctor(
     # 2. Create Doctor Profile
     db_doctor = models.Doctor(
         user_id=db_user.id,
-        specialization=specialization,
-        avg_consultation_time=avg_consultation_time,
+        specialization=doctor_in.specialization,
+        avg_consultation_time=doctor_in.avg_consultation_time,
     )
     db.add(db_doctor)
     db.commit()
