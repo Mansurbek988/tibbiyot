@@ -19,7 +19,8 @@ except Exception as e:
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="SmartMed Queue System API",
-    version="1.0.0"
+    version="1.0.0",
+    redirect_slashes=False
 )
 
 # CORS setup

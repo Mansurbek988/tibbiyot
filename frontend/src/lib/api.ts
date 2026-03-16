@@ -37,7 +37,7 @@ export const aiService = {
 };
 
 export const appointmentService = {
-    getDoctors: () => apiClient.get("/doctors/"),
+    getDoctors: () => apiClient.get("/doctors"),
     getDoctor: (id: number) => apiClient.get(`/doctors/${id}`),
     book: (doctorId: number, scheduledTime?: string) =>
         apiClient.post("/appointments/book", { doctor_id: doctorId, scheduled_time: scheduledTime }),
