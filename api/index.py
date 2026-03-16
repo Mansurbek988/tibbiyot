@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 import os
 import sys
 import traceback
@@ -39,12 +40,13 @@ async def health_check():
     }
     
     try:
-        from backend.app.core.config import settings
-        raw_url = settings.SQLALCHEMY_DATABASE_URI
-        status_info["database_configured_uri"] = raw_url.split("@")[-1] if "@" in raw_url else "no-user-info"
-        status_info["is_localhost"] = "localhost" in raw_url or "127.0.0.1" in raw_url
+        from backend.app.db.database import SessionLocal
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+        status_info["db_connection"] = "Connected"
     except Exception as e:
-        status_info["settings_error"] = str(e)
+        status_info["db_error"] = str(e)
         
     return status_info
 

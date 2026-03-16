@@ -39,15 +39,19 @@ class Settings(BaseSettings):
                 db_url = db_url.replace("postgres://", "postgresql://", 1)
             
             # Remove any trailing slash and add sslmode=require if needed
-            url = db_url.split("?")[0]
+            base_url = db_url.split("?")[0]
             params = db_url.split("?")[1] if "?" in db_url else ""
             
-            if "localhost" not in url and "127.0.0.1" not in url:
+            if "localhost" not in base_url and "127.0.0.1" not in base_url:
                 if "sslmode=require" not in params:
-                    separator = "&" if params else "?"
-                    db_url = f"{url}{separator}{params}{'&' if params else ''}sslmode=require"
+                    if params:
+                        params += "&sslmode=require"
+                    else:
+                        params = "sslmode=require"
             
-            return db_url
+            if params:
+                return f"{base_url}?{params}"
+            return base_url
             
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
