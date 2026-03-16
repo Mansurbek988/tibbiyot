@@ -21,6 +21,8 @@ export default function DoctorsList() {
                 const detail = err.response?.data?.detail;
                 if (Array.isArray(detail)) {
                     setError(detail[0]?.msg || "Ro'yxatni yuklashda xatolik");
+                } else if (typeof detail === 'object' && detail !== null) {
+                    setError(JSON.stringify(detail));
                 } else {
                     setError(detail || "Shifokorlar ro'yxatini yuklashda xatolik");
                 }

@@ -17,9 +17,25 @@ def read_doctors(
     Retrieve doctors.
     """
     query = db.query(models.Doctor).options(joinedload(models.Doctor.user))
-    doctors = query.offset(skip).limit(limit).all()
-    print(f"DEBUG: Found {len(doctors)} doctors in DB")
-    return doctors
+    doctors_objs = query.offset(skip).limit(limit).all()
+    
+    # Manual serialization to avoid SQLAlchemy issues with JSON conversion
+    result = []
+    for doc in doctors_objs:
+        result.append({
+            "id": doc.id,
+            "specialization": doc.specialization,
+            "avg_consultation_time": doc.avg_consultation_time,
+            "user": {
+                "id": doc.user.id,
+                "full_name": doc.user.full_name,
+                "phone_number": doc.user.phone_number,
+                "role": doc.user.role if isinstance(doc.user.role, str) else doc.user.role.value
+            } if doc.user else None
+        })
+    
+    print(f"DEBUG: Returning {len(result)} doctors")
+    return result
 
 @router.get("/{id}", response_model=DoctorSchema)
 def read_doctor(
