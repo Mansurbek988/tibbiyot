@@ -72,12 +72,33 @@ try:
             "project_name": settings.PROJECT_NAME
         }
 
+    from fastapi.exceptions import RequestValidationError, ResponseValidationError
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        print(f"VALIDATION ERROR (Request): {exc.errors()}")
+        return JSONResponse(
+            status_code=422,
+            content={"detail": exc.errors(), "error": "Request Validation Error"}
+        )
+
+    @app.exception_handler(ResponseValidationError)
+    async def response_validation_exception_handler(request: Request, exc: ResponseValidationError):
+        print(f"VALIDATION ERROR (Response): {exc.errors()}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "detail": f"Backend Serialization Error: {str(exc.errors())}",
+                "error": "Response Validation Error"
+            }
+        )
+
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception):
         import traceback
         error_msg = f"{type(exc).__name__}: {str(exc)}"
         full_trace = traceback.format_exc()
-        print(f"DEBUG ERROR: {error_msg}")
+        print(f"GLOBAL ERROR: {error_msg}")
         return JSONResponse(
             status_code=500,
             content={

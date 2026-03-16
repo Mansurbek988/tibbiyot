@@ -7,12 +7,12 @@ from sqlalchemy.orm import relationship
 # Lekin chigallik bo'lmasligi uchun pastda o'zimiz yaratishimiz ham mumkin.
 from backend.app.db.database import Base
 
-class RoleEnum(enum.Enum):
+class RoleEnum(str, enum.Enum):
     PATIENT = "PATIENT"
     DOCTOR = "DOCTOR"
     ADMIN = "ADMIN"
 
-class AppointmentStatus(enum.Enum):
+class AppointmentStatus(str, enum.Enum):
     PENDING = "PENDING"
     IN_QUEUE = "IN_QUEUE"
     COMPLETED = "COMPLETED"
