@@ -28,9 +28,10 @@ export default function LoginForm({ isRegistered }: { isRegistered: boolean }) {
                     const userResponse = await authService.getMe();
                     const user = userResponse.data;
 
-                    if (user.role === 'admin') {
+                    const role = user.role?.toLowerCase();
+                    if (role === 'admin') {
                         window.location.href = "/admin-dashboard";
-                    } else if (user.role === 'doctor') {
+                    } else if (role === 'doctor') {
                         window.location.href = "/doctor-dashboard";
                     } else {
                         window.location.href = "/my-queues";
