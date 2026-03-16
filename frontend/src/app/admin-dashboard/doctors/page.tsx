@@ -18,8 +18,13 @@ export default function DoctorsList() {
                 const response = await appointmentService.getDoctors();
                 setDoctors(response.data);
             } catch (err: any) {
-                setError("Shifokorlar ro'yxatini yuklashda xatolik");
-                console.error(err);
+                const detail = err.response?.data?.detail;
+                if (Array.isArray(detail)) {
+                    setError(detail[0]?.msg || "Ro'yxatni yuklashda xatolik");
+                } else {
+                    setError(detail || "Shifokorlar ro'yxatini yuklashda xatolik");
+                }
+                console.error("Doctors list fetch error:", err);
             } finally {
                 setLoading(false);
             }
