@@ -54,12 +54,46 @@ try:
     # Include the real router
     app.include_router(api_router, prefix=settings.API_V1_STR)
     
+    @app.get("/api/v1/debug")
+    def debug_info():
+        try:
+            from backend.app.db.database import SessionLocal
+            db = SessionLocal()
+            db.execute("SELECT 1")
+            db.close()
+            db_status = "Connected"
+        except Exception as e:
+            db_status = f"Error: {str(e)}"
+            
+        return {
+            "status": "Healthy",
+            "db_status": db_status,
+            "api_v1_str": settings.API_V1_STR,
+            "project_name": settings.PROJECT_NAME
+        }
+
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception):
+        import traceback
+        error_msg = f"{type(exc).__name__}: {str(exc)}"
+        full_trace = traceback.format_exc()
+        print(f"DEBUG ERROR: {error_msg}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "detail": f"{error_msg} | Trace: {full_trace[:500]}...",
+                "error": "Internal Server Error",
+                "type": type(exc).__name__
+            }
+        )
+
     @app.get("/")
     def read_root():
         return {"message": "Welcome to SmartMed Queue API (Serverless)", "status": "Healthy"}
 except Exception as e:
     error_msg = str(e)
     stack_trace = traceback.format_exc()
+    print(f"CRITICAL BACKEND ERROR: {error_msg}")
     
     @app.api_route("/{rest_of_path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
     async def caught_error(request: Request, rest_of_path: str):
@@ -69,7 +103,6 @@ except Exception as e:
             status_code=500,
             content={
                 "error": "Failed to load backend router",
-                "detail": error_msg,
-                "traceback": stack_trace
+                "detail": f"Router Load Error: {error_msg} | Trace: {stack_trace[:500]}..."
             }
         )

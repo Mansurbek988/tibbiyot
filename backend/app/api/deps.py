@@ -50,10 +50,14 @@ def get_current_user(
 
 def check_role(roles: list[models.RoleEnum]):
     def role_checker(current_user: models.User = Depends(get_current_user)):
-        if current_user.role not in roles:
+        # Convert roles to strings for robust comparison
+        role_values = [r.value if hasattr(r, 'value') else str(r) for r in roles]
+        user_role = current_user.role.value if hasattr(current_user.role, 'value') else str(current_user.role)
+        
+        if user_role not in role_values:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Sizda ushbu amalni bajarish uchun huquq yo'q",
+                detail=f"Sizda ushbu amalni bajarish uchun huquq yo'q. Rolingiz: {user_role}",
             )
         return current_user
     return role_checker
