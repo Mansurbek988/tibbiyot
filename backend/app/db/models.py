@@ -8,15 +8,15 @@ from sqlalchemy.orm import relationship
 from backend.app.db.database import Base
 
 class RoleEnum(enum.Enum):
-    PATIENT = "patient"
-    DOCTOR = "doctor"
-    ADMIN = "admin"
+    PATIENT = "PATIENT"
+    DOCTOR = "DOCTOR"
+    ADMIN = "ADMIN"
 
 class AppointmentStatus(enum.Enum):
-    PENDING = "pending"
-    IN_QUEUE = "in_queue"
-    COMPLETED = "completed"
-    CANCELED = "canceled"
+    PENDING = "PENDING"
+    IN_QUEUE = "IN_QUEUE"
+    COMPLETED = "COMPLETED"
+    CANCELED = "CANCELED"
 
 class User(Base):
     __tablename__ = "users"
