@@ -7,7 +7,7 @@ from backend.app.schemas.appointment import Doctor as DoctorSchema
 
 router = APIRouter()
 
-@router.get("/", response_model=List[DoctorSchema])
+@router.get("/")
 def read_doctors(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
