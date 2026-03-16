@@ -99,6 +99,7 @@ export default function DoctorDashboard() {
                                 <th className="px-8 py-5">№</th>
                                 <th className="px-8 py-5">Bemor ID</th>
                                 <th className="px-8 py-5">Vaqt</th>
+                                <th className="px-8 py-5">Pre-diagnoz (AI)</th>
                                 <th className="px-8 py-5">Kutilayotgan vaqt</th>
                                 <th className="px-8 py-5">Status</th>
                                 <th className="px-8 py-5 text-right">Amal</th>
@@ -107,7 +108,7 @@ export default function DoctorDashboard() {
                         <tbody>
                             {appointments.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-8 py-20 text-center text-gray-400 font-medium italic">
+                                    <td colSpan={7} className="px-8 py-20 text-center text-gray-400 font-medium italic">
                                         Hozirda navbatlar yo'q
                                     </td>
                                 </tr>
@@ -131,6 +132,23 @@ export default function DoctorDashboard() {
                                         <td className="px-8 py-6">
                                             <div className="text-sm font-semibold text-gray-500">
                                                 {apt.scheduled_time ? new Date(apt.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Navbatda"}
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="max-w-xs">
+                                                <div className="text-sm text-gray-700 font-medium truncate" title={apt.symptoms}>
+                                                    {apt.symptoms || "Shikoyat yo'q"}
+                                                </div>
+                                                {apt.ai_triage_result && (
+                                                    <div className="flex items-center gap-1.5 mt-1">
+                                                        <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md uppercase tracking-tighter">
+                                                            {apt.ai_triage_result.specialization}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400 font-bold">
+                                                            {Math.round(apt.ai_triage_result.confidence * 100)}%
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">

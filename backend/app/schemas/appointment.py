@@ -25,7 +25,7 @@ class AppointmentBase(BaseModel):
     scheduled_time: Optional[datetime] = None
 
 class AppointmentCreate(AppointmentBase):
-    pass
+    symptoms: Optional[str] = None
 
 class Appointment(AppointmentBase):
     id: int
@@ -33,6 +33,8 @@ class Appointment(AppointmentBase):
     predicted_wait_time: Optional[int] = None
     status: str
     queue_number: Optional[int] = None
+    symptoms: Optional[str] = None
+    ai_triage_result: Optional[dict] = None
 
     class Config:
         from_attributes = True

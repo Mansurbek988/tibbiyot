@@ -49,6 +49,8 @@ class Appointment(Base):
     predicted_wait_time = Column(Integer) # AI yordamida hisoblangan kutish vaqti
     status = Column(Enum(AppointmentStatus), default=AppointmentStatus.PENDING)
     queue_number = Column(Integer)
+    symptoms = Column(String, nullable=True) # Bemor shikoyati
+    ai_triage_result = Column(JSON, nullable=True) # AI triage natijasi (specialization, confidence)
 
 class MedicalHistory(Base):
     __tablename__ = "medical_history"

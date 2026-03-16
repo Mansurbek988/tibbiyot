@@ -29,16 +29,26 @@ def register(
             detail="The user with this phone number already exists in the system.",
         )
     
-    db_obj = models.User(
-        full_name=user_in.full_name,
-        phone_number=user_in.phone_number,
-        password_hash=security.get_password_hash(user_in.password),
-        role=user_in.role,
-    )
-    db.add(db_obj)
-    db.commit()
-    db.refresh(db_obj)
-    return db_obj
+    try:
+        password_hash = security.get_password_hash(user_in.password)
+        
+        # Public registration is only for Patients
+        db_obj = models.User(
+            full_name=user_in.full_name,
+            phone_number=user_in.phone_number,
+            password_hash=password_hash,
+            role=models.RoleEnum.PATIENT, # Forced to PATIENT
+        )
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+    except Exception as e:
+        print(f"Xatolik ro'yxatdan o'tishda: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Server ichki xatosi: {str(e)}"
+        )
 
 @router.post("/login", response_model=Token)
 def login_access_token(
@@ -49,7 +59,7 @@ def login_access_token(
     """
     user = db.query(models.User).filter(models.User.phone_number == form_data.username).first()
     if not user or not security.verify_password(form_data.password, user.password_hash):
-        raise HTTPException(status_code=400, detail="Incorrect phone number or password")
+        raise HTTPException(status_code=400, detail="Telefon raqam yoki parol xato")
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
@@ -58,7 +68,6 @@ def login_access_token(
         ),
         "token_type": "bearer",
     }
-
 @router.get("/me", response_model=User)
 def read_user_me(
     current_user: models.User = Depends(deps.get_current_user),

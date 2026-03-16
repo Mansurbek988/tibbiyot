@@ -37,6 +37,7 @@ async def book_appointment(
     new_queue_number = max_queue + 1
 
     # 3. Predict wait time using AI Service
+    from datetime import datetime
     current_hour = datetime.now().hour
     wait_time = ai_service.calculate_wait_time(
         queue_length=new_queue_number,
@@ -44,14 +45,21 @@ async def book_appointment(
         current_hour=current_hour
     )
 
-    # 4. Create appointment
+    # 4. Perform AI Triage on symptoms if provided
+    ai_result = None
+    if appointment_in.symptoms:
+        ai_result = ai_service.predict_specialization(appointment_in.symptoms)
+
+    # 5. Create appointment
     db_obj = models.Appointment(
         patient_id=current_user.id,
         doctor_id=appointment_in.doctor_id,
         scheduled_time=appointment_in.scheduled_time,
         predicted_wait_time=wait_time,
         queue_number=new_queue_number,
-        status=AppointmentStatus.IN_QUEUE
+        status=AppointmentStatus.IN_QUEUE,
+        symptoms=appointment_in.symptoms,
+        ai_triage_result=ai_result
     )
     db.add(db_obj)
     db.commit()

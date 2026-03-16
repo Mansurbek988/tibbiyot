@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from backend.app.db.models import RoleEnum
 
 # Shared properties
@@ -12,7 +12,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     full_name: str
     phone_number: str
-    password: str
+    password: str = Field(..., max_length=72)
 
 # Properties to receive via API on update
 class UserUpdate(UserBase):

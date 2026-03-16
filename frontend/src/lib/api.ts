@@ -9,11 +9,17 @@ const apiClient = axios.create({
     },
 });
 
-// Request interceptor to add JWT token
+// Request interceptor to add JWT token safely
 apiClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== "undefined") {
+        try {
+            const token = localStorage.getItem("token");
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        } catch (e) {
+            console.error("localStorage access failed:", e);
+        }
     }
     return config;
 });
@@ -37,6 +43,16 @@ export const appointmentService = {
         apiClient.post("/appointments/book", { doctor_id: doctorId, scheduled_time: scheduledTime }),
     getMyAppointments: () => apiClient.get("/appointments/my"),
     getDoctorQueue: () => apiClient.get("/appointments/doctor-queue"),
+};
+
+export const adminService = {
+    getStats: () => apiClient.get("/admin/stats"),
+    createDoctor: (userData: any, specialization: string, avgTime: number = 15) =>
+        apiClient.post("/admin/create-doctor", {
+            user_in: userData,
+            specialization,
+            avg_consultation_time: avgTime
+        }),
 };
 
 export default apiClient;

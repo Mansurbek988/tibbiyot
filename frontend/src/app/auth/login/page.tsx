@@ -1,18 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { authService } from "@/lib/api";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Mail, Lock, LogIn, AlertCircle } from "lucide-react";
-import Link from "next/link";
+import React, { useState, useEffect } from 'react';
 
 export default function LoginPage() {
-    const [phoneNumber, setPhoneNumber] = useState("");
+    const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const router = useRouter();
+    const [isRegistered, setIsRegistered] = useState(false);
+
+    // Using useEffect + URLSearchParams for absolute stability across Next.js versions
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get("registered") === "true") {
+                    setIsRegistered(true);
+                }
+            } catch (e) {
+                console.warn("Search params error:", e);
+            }
+        }
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,87 +29,206 @@ export default function LoginPage() {
         setError("");
 
         try {
-            const formData = new FormData();
-            formData.append("username", phoneNumber); // FastAPI uses 'username' for OAuth2, we pass phone_number
+            // FastAPI OAuth2 expects form-urlencoded data
+            const formData = new URLSearchParams();
+            formData.append("username", phone);
             formData.append("password", password);
 
-            const response = await authService.login(formData);
-            localStorage.setItem("token", response.data.access_token);
-            router.push("/my-queues");
-        } catch (err: any) {
-            setError(err.response?.data?.detail || "Telefon raqam yoki parol xato");
+            const res = await fetch("/api/v1/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json"
+                },
+                body: formData.toString(),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (typeof window !== "undefined") {
+                    localStorage.setItem("token", data.access_token);
+
+                    // Fetch user info to determine redirect
+                    const meRes = await fetch("/api/v1/auth/me", {
+                        headers: {
+                            "Authorization": `Bearer ${data.access_token}`
+                        }
+                    });
+
+                    if (meRes.ok) {
+                        const user = await meRes.json();
+                        console.log("Login page fetched user info:", user);
+
+                        // Robust role check
+                        const checkRole = (r: string) => {
+                            if (!user.role) return false;
+                            const userRole = String(user.role).toLowerCase();
+                            return userRole === r.toLowerCase() || userRole.includes(r.toLowerCase());
+                        };
+
+                        if (checkRole('admin')) {
+                            window.location.href = "/admin-dashboard";
+                        } else if (checkRole('doctor')) {
+                            window.location.href = "/doctor-dashboard";
+                        } else {
+                            window.location.href = "/my-queues";
+                        }
+                    } else {
+                        const errData = await meRes.json().catch(() => ({}));
+                        console.error("Failed to fetch user info after login:", meRes.status, errData);
+                        window.location.href = "/";
+                    }
+                }
+            } else {
+                const data = await res.json();
+                setError(data.detail || "Telefon raqam yoki parol xato");
+            }
+        } catch (err) {
+            console.error("Login fetch error:", err);
+            setError("Server bilan ulanishda xato yuz berdi");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="max-w-md w-full bg-white rounded-3xl p-10 shadow-2xl shadow-blue-100 border border-gray-100"
-            >
-                <div className="text-center mb-10">
-                    <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-lg shadow-blue-200">
-                        <LogIn size={32} />
+        <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '80vh',
+            padding: '20px'
+        }}>
+            <div style={{
+                maxWidth: '420px',
+                width: '100%',
+                backgroundColor: 'white',
+                padding: '40px',
+                borderRadius: '24px',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.05)',
+                border: '1px solid #f1f5f9'
+            }}>
+                <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                    <div style={{
+                        width: '64px',
+                        height: '64px',
+                        backgroundColor: '#2563eb',
+                        color: 'white',
+                        borderRadius: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '32px',
+                        margin: '0 auto 16px auto'
+                    }}>
+                        T
                     </div>
-                    <h1 className="text-3xl font-extrabold mb-2">Xush kelibsiz</h1>
-                    <p className="text-gray-500">Profilga kirish uchun ma'lumotlarni kiriting</p>
+                    <h1 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 8px 0', color: '#0f172a' }}>
+                        Xush kelibsiz
+                    </h1>
+                    <p style={{ color: '#64748b', margin: 0 }}>Profilingizga kiring</p>
                 </div>
 
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center gap-3 animate-shake">
-                        <AlertCircle size={20} />
-                        <span className="text-sm font-medium">{error}</span>
+                {isRegistered && !error && (
+                    <div style={{
+                        marginBottom: '24px',
+                        padding: '16px',
+                        backgroundColor: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        color: '#15803d',
+                        borderRadius: '16px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        textAlign: 'center'
+                    }}>
+                        Muvaffaqiyatli ro'yxatdan o'tdingiz!
                     </div>
                 )}
 
-                <form onSubmit={handleLogin} className="space-y-6">
-                    <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                {error && (
+                    <div style={{
+                        marginBottom: '24px',
+                        padding: '16px',
+                        backgroundColor: '#fef2f2',
+                        border: '1px solid #fecaca',
+                        color: '#b91c1c',
+                        borderRadius: '16px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        textAlign: 'center'
+                    }}>
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div>
                         <input
                             type="text"
+                            placeholder="Telefon raqami"
+                            value={phone}
+                            onChange={e => setPhone(e.target.value)}
                             required
-                            placeholder="Telefon raqamingiz"
-                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
-                            value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '16px',
+                                borderRadius: '14px',
+                                border: '1px solid #e2e8f0',
+                                backgroundColor: '#f8fafc',
+                                boxSizing: 'border-box',
+                                outline: 'none',
+                                fontSize: '16px'
+                            }}
                         />
                     </div>
-
-                    <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <div>
                         <input
                             type="password"
-                            required
-                            placeholder="Parolingiz"
-                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                            placeholder="Parol"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                            style={{
+                                width: '100%',
+                                padding: '16px',
+                                borderRadius: '14px',
+                                border: '1px solid #e2e8f0',
+                                backgroundColor: '#f8fafc',
+                                boxSizing: 'border-box',
+                                outline: 'none',
+                                fontSize: '16px'
+                            }}
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full btn-primary py-4 flex items-center justify-center gap-2 text-lg disabled:opacity-50"
+                        style={{
+                            marginTop: '8px',
+                            padding: '16px',
+                            borderRadius: '14px',
+                            border: 'none',
+                            backgroundColor: '#2563eb',
+                            color: 'white',
+                            fontWeight: '700',
+                            fontSize: '16px',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            opacity: loading ? 0.7 : 1,
+                            transition: 'background 0.2s'
+                        }}
                     >
-                        {loading ? (
-                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                            "Tizimga kirish"
-                        )}
+                        {loading ? "Yuklanmoqda..." : "Tizimga kirish"}
                     </button>
                 </form>
 
-                <div className="mt-8 text-center border-t border-gray-100 pt-8">
-                    <p className="text-gray-500 mb-2">Hisobingiz yo'qmi?</p>
-                    <Link href="/auth/register" className="text-blue-600 font-bold hover:underline">
+                <div style={{ marginTop: '32px', textAlign: 'center', borderTop: '1px solid #f1f5f9', paddingTop: '24px' }}>
+                    <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '8px' }}>Hisobingiz yo'qmi?</p>
+                    <a href="/auth/register" style={{ color: '#2563eb', fontWeight: '700', textDecoration: 'none' }}>
                         Ro'yxatdan o'tish
-                    </Link>
+                    </a>
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 }

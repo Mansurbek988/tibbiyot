@@ -9,7 +9,17 @@ root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if root_path not in sys.path:
     sys.path.insert(0, root_path)
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/health")
 @app.get("/api/health")
@@ -23,7 +33,8 @@ async def health_check():
             "DATABASE_URL_SET": "DATABASE_URL" in os.environ,
             "POSTGRES_URL_SET": "POSTGRES_URL" in os.environ,
             "AVAILABLE_DATABASE_KEYS": [k for k in os.environ.keys() if "DATABASE" in k or "POSTGRES" in k],
-            "PYTHON_PATH": sys.path
+            "PYTHON_PATH": sys.path,
+            "DEPLOYMENT_VERSION": "v1.0.1-password-fix-applied"
         }
     }
     
@@ -38,9 +49,14 @@ async def health_check():
     return status_info
 
 try:
-    from backend.app.main import app as backend_app
-    # Mount the real app
-    app.mount("/", backend_app)
+    from backend.app.api.v1.api import api_router
+    from backend.app.core.config import settings
+    # Include the real router
+    app.include_router(api_router, prefix=settings.API_V1_STR)
+    
+    @app.get("/")
+    def read_root():
+        return {"message": "Welcome to SmartMed Queue API (Serverless)", "status": "Healthy"}
 except Exception as e:
     error_msg = str(e)
     stack_trace = traceback.format_exc()
@@ -52,7 +68,7 @@ except Exception as e:
         return JSONResponse(
             status_code=500,
             content={
-                "error": "Failed to load backend app",
+                "error": "Failed to load backend router",
                 "detail": error_msg,
                 "traceback": stack_trace
             }

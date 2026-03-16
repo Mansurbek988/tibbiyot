@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { authService } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { Mail, Lock, User, UserPlus, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -21,36 +20,24 @@ export default function RegisterPage() {
         setError("");
 
         try {
-            const response = await authService.register({
+            await authService.register({
                 full_name: fullName,
                 phone_number: phoneNumber,
                 password: password,
             });
-            console.log("Registration successful:", response.data);
-            // After registration, redirect to login
-            router.push("/auth/login?registered=true");
+            // Simplified redirect
+            window.location.href = "/auth/login?registered=true";
         } catch (err: any) {
-            console.error("Registration error details:", err);
+            console.error("Registration error:", err);
             const status = err.response?.status;
             const detail = err.response?.data?.detail;
-            const traceback = err.response?.data?.traceback;
 
             let message = "Ro'yxatdan o'tishda xatolik yuz berdi";
-
-            if (status === 404) {
-                message = "API topilmadi (404). Backend ulanishini tekshiring.";
-            } else if (typeof detail === 'string') {
+            if (typeof detail === 'string') {
                 message = detail;
             } else if (Array.isArray(detail)) {
-                message = detail[0]?.msg || JSON.stringify(detail);
-            } else if (status) {
-                message = `Xatolik yuz berdi (Status: ${status})`;
+                message = detail[0]?.msg || "Ma'lumotlar xato";
             }
-
-            if (traceback) {
-                console.error("Backend Traceback:", traceback);
-            }
-
             setError(message);
         } finally {
             setLoading(false);
@@ -59,22 +46,18 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="max-w-md w-full bg-white rounded-3xl p-10 shadow-2xl shadow-blue-100 border border-gray-100"
-            >
+            <div className="max-w-md w-full bg-white rounded-3xl p-10 shadow-xl border border-gray-100">
                 <div className="text-center mb-10">
                     <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-lg shadow-blue-200">
                         <UserPlus size={32} />
                     </div>
-                    <h1 className="text-3xl font-extrabold mb-2">Ro'yxatdan o'tish</h1>
+                    <h1 className="text-3xl font-extrabold mb-2 text-gray-900">Ro'yxatdan o'tish</h1>
                     <p className="text-gray-500">Yangi hisob yaratish uchun ma'lumotlarni kiriting</p>
                 </div>
 
                 {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center gap-3">
-                        <AlertCircle size={20} />
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-center gap-3">
+                        <AlertCircle size={20} className="shrink-0" />
                         <span className="text-sm font-medium">{error}</span>
                     </div>
                 )}
@@ -86,7 +69,7 @@ export default function RegisterPage() {
                             type="text"
                             required
                             placeholder="To'liq ismingiz"
-                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
                         />
@@ -98,7 +81,7 @@ export default function RegisterPage() {
                             type="text"
                             required
                             placeholder="Telefon raqamingiz"
-                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all"
                             value={phoneNumber}
                             onChange={(e) => setPhoneNumber(e.target.value)}
                         />
@@ -110,7 +93,7 @@ export default function RegisterPage() {
                             type="password"
                             required
                             placeholder="Parol yaratish"
-                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -119,7 +102,7 @@ export default function RegisterPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full btn-primary py-4 flex items-center justify-center gap-2 text-lg disabled:opacity-50"
+                        className="w-full bg-blue-600 text-white py-4 rounded-xl flex items-center justify-center gap-2 text-lg font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors"
                     >
                         {loading ? (
                             <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -135,7 +118,7 @@ export default function RegisterPage() {
                         Tizimga kirish
                     </Link>
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 }
