@@ -12,6 +12,14 @@ class DoctorBase(BaseModel):
 class DoctorCreate(DoctorBase):
     user_id: int
 
+class DoctorUpdate(BaseModel):
+    specialization: Optional[str] = None
+    avg_consultation_time: Optional[int] = None
+
+class DoctorUpdateRequest(BaseModel):
+    user_up: Optional[UserUpdate] = None
+    doctor_up: Optional[DoctorUpdate] = None
+
 class DoctorCreateRequest(BaseModel):
     user_in: UserCreate
     specialization: str

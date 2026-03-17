@@ -53,6 +53,12 @@ export const adminService = {
             specialization,
             avg_consultation_time: avgTime
         }),
+    updateDoctor: (id: number, userData?: any, doctorData?: any) =>
+        apiClient.put(`/admin/doctors/${id}`, {
+            user_up: userData,
+            doctor_up: doctorData
+        }),
+    deleteDoctor: (id: number) => apiClient.delete(`/admin/doctors/${id}`),
 };
 
 export default apiClient;

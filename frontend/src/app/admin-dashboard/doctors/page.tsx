@@ -11,28 +11,39 @@ export default function DoctorsList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        const fetchDoctors = async () => {
-            try {
-                // Using getDoctors from appointmentService as it's already there
-                const response = await appointmentService.getDoctors();
-                setDoctors(response.data);
-            } catch (err: any) {
-                const detail = err.response?.data?.detail;
-                if (Array.isArray(detail)) {
-                    setError(detail[0]?.msg || "Ro'yxatni yuklashda xatolik");
-                } else if (typeof detail === 'object' && detail !== null) {
-                    setError(JSON.stringify(detail));
-                } else {
-                    setError(detail || "Shifokorlar ro'yxatini yuklashda xatolik");
-                }
-                console.error("Doctors list fetch error:", err);
-            } finally {
-                setLoading(false);
+    const fetchDoctors = async () => {
+        try {
+            const response = await appointmentService.getDoctors();
+            setDoctors(response.data);
+        } catch (err: any) {
+            const detail = err.response?.data?.detail;
+            if (Array.isArray(detail)) {
+                setError(detail[0]?.msg || "Ro'yxatni yuklashda xatolik");
+            } else if (typeof detail === 'object' && detail !== null) {
+                setError(JSON.stringify(detail));
+            } else {
+                setError(detail || "Shifokorlar ro'yxatini yuklashda xatolik");
             }
-        };
+            console.error("Doctors list fetch error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchDoctors();
     }, []);
+
+    const handleDelete = async (id: number) => {
+        if (!confirm("Haqiqatan ham ushbu shifokorni o'chirib tashlamoqchimisiz?")) return;
+
+        try {
+            await adminService.deleteDoctor(id);
+            fetchDoctors(); // Refresh list
+        } catch (err: any) {
+            alert(err.response?.data?.detail || "O'chirishda xatolik yuz berdi");
+        }
+    };
 
     if (loading) return (
         <div className="min-h-screen bg-gray-50">
@@ -111,10 +122,16 @@ export default function DoctorsList() {
                                 </div>
 
                                 <div className="mt-8 pt-8 flex gap-3">
-                                    <button className="flex-1 bg-gray-50 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all border border-gray-100">
+                                    <a 
+                                        href={`/admin-dashboard/doctors/edit/${doc.id}`}
+                                        className="flex-1 bg-gray-50 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all border border-gray-100 text-center"
+                                    >
                                         Tahrirlash
-                                    </button>
-                                    <button className="w-12 h-12 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                                    </a>
+                                    <button 
+                                        onClick={() => handleDelete(doc.id)}
+                                        className="w-12 h-12 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                                    >
                                         <Trash2 size={20} />
                                     </button>
                                 </div>
