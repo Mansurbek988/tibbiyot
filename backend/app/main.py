@@ -10,11 +10,11 @@ import os
 import sys
 import traceback
 
-# Database initialization
-try:
-    models.Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"Database sync error: {e}")
+# Database initialization - commented out to avoid startup issues on Vercel
+# try:
+#     models.Base.metadata.create_all(bind=engine)
+# except Exception as e:
+#     print(f"Database sync error: {e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -39,10 +39,9 @@ async def health_check():
     status_info = {
         "status": "ok",
         "env_diagnostics": {
-            "DATABASE_URL_SET": "DATABASE_URL" in os.environ,
-            "POSTGRES_URL_SET": "POSTGRES_URL" in os.environ,
-            "AVAILABLE_DATABASE_KEYS": [k for k in os.environ.keys() if "DATABASE" in k or "POSTGRES" in k],
-            "DEPLOYMENT_VERSION": "v1.0.2-unified"
+            "DATABASE_URL_SET": "DATABASE_URL" in os.environ or "POSTGRES_URL" in os.environ,
+            "GROQ_API_KEY_SET": settings.GROQ_API_KEY is not None and len(settings.GROQ_API_KEY) > 0,
+            "DEPLOYMENT_VERSION": "v1.0.3-groq-fix"
         }
     }
     try:

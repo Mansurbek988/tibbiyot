@@ -8,8 +8,15 @@ class AIService:
         # GROQ_API_KEY will be loaded from environment variable in production
         self.api_key = settings.GROQ_API_KEY
         self.client = None
-        if self.api_key:
-            self.client = Groq(api_key=self.api_key)
+        try:
+            if self.api_key:
+                self.client = Groq(api_key=self.api_key)
+                print("Groq client initialized")
+            else:
+                print("GROQ_API_KEY not found in settings")
+        except Exception as e:
+            print(f"Failed to initialize Groq client: {e}")
+            self.client = None
         self.model = "llama3-70b-8192"
         
         # List of available specializations in our system
@@ -47,6 +54,7 @@ Rules:
 4. If the symptoms are vague, choose 'General Practitioner'.
 5. Only use specializations from the provided list.
 """
+        # scikit-learn removed for lighter deployment
 
         try:
             chat_completion = self.client.chat.completions.create(
