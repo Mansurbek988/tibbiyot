@@ -81,11 +81,12 @@ Rules:
                 "analysis": result.get("analysis", "Simptomlaringiz bo'yicha umumiy ko'rikdan o'tish tavsiya etiladi.")
             }
         except Exception as e:
-            print(f"Groq AI Error: {e}")
+            error_msg = str(e)
+            print(f"Groq AI Error: {error_msg}")
             return {
                 "specialization": "General Practitioner", 
                 "confidence": 0.5,
-                "analysis": "Xatolik yuz berdi, iltimos umumiy shifokorga murojaat qiling."
+                "analysis": f"AI xatoligi (Vercel loglaridan): {error_msg}. Iltimos, Groq API kalitini tekshiring."
             }
 
     def calculate_wait_time(self, queue_length: int, avg_consultation_time: int, current_hour: int):
