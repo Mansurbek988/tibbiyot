@@ -5,6 +5,7 @@ import { adminService, appointmentService } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import { motion } from "framer-motion";
 import { User, Trash2, Shield, Calendar, Clock } from "lucide-react";
+import Link from "next/link";
 
 export default function DoctorsList() {
     const [doctors, setDoctors] = useState<any[]>([]);
@@ -121,16 +122,17 @@ export default function DoctorsList() {
                                     </div>
                                 </div>
 
-                                <div className="mt-8 pt-8 flex gap-3">
-                                    <a 
+                                <div className="mt-8 pt-8 flex gap-3 relative z-10">
+                                    <Link 
                                         href={`/admin-dashboard/doctors/edit/${doc.id}`}
-                                        className="flex-1 bg-gray-50 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all border border-gray-100 text-center"
+                                        className="flex-1 bg-gray-50 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all border border-gray-100 text-center cursor-pointer"
                                     >
                                         Tahrirlash
-                                    </a>
+                                    </Link>
                                     <button 
+                                        type="button"
                                         onClick={() => handleDelete(doc.id)}
-                                        className="w-12 h-12 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                                        className="w-12 h-12 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all cursor-pointer"
                                     >
                                         <Trash2 size={20} />
                                     </button>
