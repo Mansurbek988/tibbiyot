@@ -22,7 +22,10 @@ export default function Home() {
       setResult(response.data);
     } catch (error: any) {
       console.error("Triage error:", error);
-      alert(error.response?.data?.detail || "AI tahlilida xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko'ring.");
+      const errorMsg = error.response?.data?.error || 
+                       error.response?.data?.detail || 
+                       (error.response?.data ? JSON.stringify(error.response?.data) : error.message);
+      alert(`AI tahlilida xatolik yuz berdi: ${errorMsg}`);
     } finally {
       setLoading(false);
     }

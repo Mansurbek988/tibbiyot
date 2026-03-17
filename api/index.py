@@ -23,11 +23,15 @@ except Exception as e:
     
     @app.get("/api/v1/health")
     @app.get("/health")
+    @app.get("/api/health")
     def health_check():
         return {
             "status": "import_failed",
             "error": str(e),
-            "traceback": stack_trace[:500]
+            "traceback": stack_trace[:1000],
+            "sys_path": sys.path,
+            "cwd": os.getcwd(),
+            "env": {k: "SET" for k in os.environ.keys() if "KEY" in k or "SECRET" in k or "URL" in k}
         }
     
     @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
