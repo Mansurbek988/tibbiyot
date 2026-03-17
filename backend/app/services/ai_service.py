@@ -1,56 +1,81 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.svm import LinearSVC
-from sklearn.pipeline import Pipeline
-import numpy as np
-import pickle
 import os
+import json
+from groq import Groq
+from backend.app.core.config import settings
 
 class AIService:
     def __init__(self):
-        # Initial training data for Symptom Triage (Mock dataset for starting)
-        self.symptom_data = [
-            ("heart hurts chest pain heavy breathing", "Cardiologist"),
-            ("headache blurred vision neck pain", "Neurologist"),
-            ("stomach ache nausea vomiting digestion", "Gastroenterologist"),
-            ("bone break fracture joint pain", "Orthopedist"),
-            ("skin rash itchy redness", "Dermatologist"),
-            ("blurry eyes vision loss eye pain", "Ophthalmologist"),
-            ("cough fever sore throat flu symptoms", "General Practitioner"),
+        # GROQ_API_KEY will be loaded from environment variable in production
+        self.api_key = settings.GROQ_API_KEY
+        self.client = None
+        if self.api_key:
+            self.client = Groq(api_key=self.api_key)
+        self.model = "llama3-70b-8192"
+        
+        # List of available specializations in our system
+        self.available_specializations = [
+            "Cardiologist",
+            "Neurologist",
+            "Gastroenterologist",
+            "Orthopedist",
+            "Dermatologist",
+            "Ophthalmologist",
+            "General Practitioner",
+            "Pediatrician",
+            "Urologist",
+            "Gynaecologist"
         ]
-        
-        # Prepare Triage Model
-        texts = [d[0] for d in self.symptom_data]
-        labels = [d[1] for d in self.symptom_data]
-        
-        self.triage_pipeline = Pipeline([
-            ('tfidf', TfidfVectorizer()),
-            ('clf', LinearSVC())
-        ])
-        self.triage_pipeline.fit(texts, labels)
 
     def predict_specialization(self, symptoms: str):
         """
-        Predicts doctor specialization based on symptoms text.
+        Predicts doctor specialization based on symptoms text using Groq LLM.
         """
         if not symptoms or len(symptoms.strip()) < 3:
             return {"specialization": "General Practitioner", "confidence": 0.5}
             
-        prediction = self.triage_pipeline.predict([symptoms])[0]
-        # LinearSVC doesn't provide easy confidence scores without calibration,
-        # so we return a placeholder or use decision_function for more complexity.
-        return {
-            "specialization": prediction,
-            "confidence": 0.85 # Simplified for demo
-        }
+        if not self.client:
+            # Fallback if API key is missing
+            return {"specialization": "General Practitioner", "confidence": 0.5}
+
+        system_prompt = f"""You are a medical triage assistant. Your task is to analyze patient symptoms and recommend the most appropriate medical specialist from the following list:
+{', '.join(self.available_specializations)}.
+
+Rules:
+1. Always respond in JSON format.
+2. The JSON must contain exactly two keys: 'specialization' (string) and 'confidence' (float between 0 and 1).
+3. If multiple specialists could apply, choose the most relevant primary one.
+4. If the symptoms are vague, choose 'General Practitioner'.
+5. Only use specializations from the provided list.
+"""
+
+        try:
+            chat_completion = self.client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Symptoms: {symptoms}"}
+                ],
+                model=self.model,
+                response_format={"type": "json_object"}
+            )
+            
+            result = json.loads(chat_completion.choices[0].message.content)
+            
+            # Basic validation
+            if result.get("specialization") not in self.available_specializations:
+                result["specialization"] = "General Practitioner"
+                
+            return {
+                "specialization": result.get("specialization", "General Practitioner"),
+                "confidence": result.get("confidence", 0.8)
+            }
+        except Exception as e:
+            print(f"Groq AI Error: {e}")
+            return {"specialization": "General Practitioner", "confidence": 0.5}
 
     def calculate_wait_time(self, queue_length: int, avg_consultation_time: int, current_hour: int):
         """
-        Predicts wait time using a simplified regression approach.
-        In a real scenario, this would use a GradientBoostingRegressor
-        trained on historical appointment data.
+        Predicts wait time using a simplified domain calculation.
         """
-        # Feature vector: [Queue Length, Avg Service Time, Hour of Day]
-        # Hour of Day weight: morning/evening might be slower or faster
         hour_impact = 1.0
         if 8 <= current_hour <= 10: # Morning rush
             hour_impact = 1.2
@@ -58,10 +83,6 @@ class AIService:
             hour_impact = 1.1
 
         base_prediction = queue_length * avg_consultation_time * hour_impact
-        
-        # Adding a bit of "noise" to simulate complexity
-        simulated_prediction = base_prediction * np.random.uniform(0.9, 1.1)
-        
-        return int(round(simulated_prediction))
+        return int(round(base_prediction))
 
 ai_service = AIService()

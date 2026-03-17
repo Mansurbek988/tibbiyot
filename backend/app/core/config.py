@@ -4,9 +4,12 @@ from typing import Optional
 class Settings(BaseSettings):
     PROJECT_NAME: str = "SmartMed Queue"
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = "YOUR_SUPER_SECRET_KEY_HERE"  # In production, read from .env
+    SECRET_KEY: str = "YOUR_SUPER_SECRET_KEY_HERE"  # In python-multipart>=0.0.6
+email-validator>=2.0.0
+groq>=0.4.2
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
+    GROQ_API_KEY: Optional[str] = None
     
     # Database configuration
     POSTGRES_SERVER: str = "localhost"
