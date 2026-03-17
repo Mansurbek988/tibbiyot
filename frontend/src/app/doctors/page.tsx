@@ -1,14 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { appointmentService } from "@/lib/api";
-import { motion } from "framer-motion";
-import { User, Clock, Star, MapPin, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, Clock, Star, MapPin, Search, CheckCircle2, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
-export default function DoctorsPage() {
+function DoctorsList() {
     const [doctors, setDoctors] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [bookingId, setBookingId] = useState<number | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const querySearch = searchParams.get("search");
+        if (querySearch) {
+            setSearchTerm(querySearch);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         const fetchDoctors = async () => {
@@ -23,6 +34,20 @@ export default function DoctorsPage() {
         };
         fetchDoctors();
     }, []);
+
+    const handleBook = async (doctorId: number) => {
+        setBookingId(doctorId);
+        try {
+            await appointmentService.book(doctorId);
+            setSuccessMessage("Navbatga muvaffaqiyatli yozildingiz! 'Navbatlarim' bo'limida kuzatishingiz mumkin.");
+            setTimeout(() => setSuccessMessage(null), 5000);
+        } catch (error: any) {
+            console.error("Booking error:", error);
+            alert(error.response?.data?.detail || "Navbatga yozilishda xato yuz berdi. Balki tizimga kirmagandirsiz?");
+        } finally {
+            setBookingId(null);
+        }
+    };
 
     const filteredDoctors = doctors.filter(doctor => {
         const fullName = doctor.user?.full_name || '';
@@ -57,6 +82,25 @@ export default function DoctorsPage() {
                 </div>
             ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <AnimatePresence>
+                        {successMessage && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="col-span-full bg-green-50 border border-green-200 text-green-700 p-4 rounded-2xl flex items-center justify-between mb-4 shadow-sm"
+                            >
+                                <div className="flex items-center gap-3 font-medium">
+                                    <CheckCircle2 className="text-green-600" />
+                                    {successMessage}
+                                </div>
+                                <button onClick={() => setSuccessMessage(null)} className="text-green-500 hover:text-green-700">
+                                    <X size={20} />
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     {filteredDoctors.map((doctor, index) => (
                         <motion.div
                             key={doctor.id}
@@ -70,7 +114,7 @@ export default function DoctorsPage() {
                                     {doctor.user?.full_name?.charAt(0) || <User size={32} />}
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors">{doctor.user?.full_name}</h3>
+                                    <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors uppercase">{doctor.user?.full_name}</h3>
                                     <p className="text-blue-600 font-medium">{doctor.specialization}</p>
                                 </div>
                             </div>
@@ -99,8 +143,14 @@ export default function DoctorsPage() {
                                 </div>
                             </div>
 
-                            <button className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
-                                Navbatga yozilish
+                            <button 
+                                onClick={() => handleBook(doctor.id)}
+                                disabled={bookingId === doctor.id}
+                                className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {bookingId === doctor.id ? (
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                ) : "Navbatga yozilish"}
                             </button>
                         </motion.div>
                     ))}
@@ -113,5 +163,13 @@ export default function DoctorsPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function DoctorsPage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center items-center h-screen"><div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div></div>}>
+            <DoctorsList />
+        </Suspense>
     );
 }

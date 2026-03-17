@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Search, MapPin, Clock, Activity, ArrowRight, ShieldCheck, HeartPulse } from "lucide-react";
+import { Search, MapPin, Clock, Activity, ArrowRight, ShieldCheck, HeartPulse, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { aiService } from "@/lib/api";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [symptoms, setSymptoms] = useState("");
+  const [heroSearch, setHeroSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ specialization: string; confidence: number } | null>(null);
+  const router = useRouter();
 
   const handleTriage = async () => {
     if (!symptoms) return;
@@ -20,6 +24,13 @@ export default function Home() {
       console.error("Triage error:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleHeroSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (heroSearch.trim()) {
+      router.push(`/doctors?search=${encodeURIComponent(heroSearch)}`);
     }
   };
 
@@ -44,11 +55,28 @@ export default function Home() {
                 AI yordamida shifokorni aniqlang, navbatga onlayn yoziling va kutish vaqtingizni aniq biling.
               </p>
 
-              <div className="flex gap-4">
-                <button className="btn-primary flex items-center gap-2">
-                  Navbat olish <ArrowRight size={20} />
+              <form onSubmit={handleHeroSearch} className="relative mb-8 max-w-lg">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input 
+                  type="text" 
+                  placeholder="Shifokor yoki mutaxassislik..." 
+                  className="w-full pl-12 pr-32 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                  value={heroSearch}
+                  onChange={(e) => setHeroSearch(e.target.value)}
+                />
+                <button type="submit" className="absolute right-2 top-2 bottom-2 bg-blue-600 text-white px-6 rounded-xl font-bold hover:bg-blue-700 transition-all">
+                  Qidirish
                 </button>
-                <button className="px-6 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors">
+              </form>
+
+              <div className="flex gap-4">
+                <Link href="/doctors" className="btn-primary flex items-center gap-2">
+                  Navbat olish <ArrowRight size={20} />
+                </Link>
+                <button 
+                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="px-6 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+                >
                   Bog'lanish
                 </button>
               </div>
@@ -110,9 +138,12 @@ export default function Home() {
                     <h4 className="text-xl font-bold text-blue-900">{result.specialization}</h4>
                     <div className="mt-2 flex items-center justify-between">
                       <span className="text-xs text-blue-500">Ishonchlilik: {(result.confidence * 100).toFixed(0)}%</span>
-                      <button className="text-sm text-blue-700 font-bold flex items-center gap-1 hover:underline">
+                      <Link 
+                        href={`/doctors?search=${encodeURIComponent(result.specialization)}`}
+                        className="text-sm text-blue-700 font-bold flex items-center gap-1 hover:underline cursor-pointer"
+                      >
                         Mutaxassisni tanlash <ArrowRight size={14} />
-                      </button>
+                      </Link>
                     </div>
                   </motion.div>
                 )}
@@ -133,7 +164,7 @@ export default function Home() {
             <p className="text-gray-500 max-w-2xl mx-auto">Tibbiyot muassasalari uchun eng zamonaviy va qulay yechim</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
             {[
               {
                 icon: <Clock className="text-blue-600" />,
@@ -159,6 +190,31 @@ export default function Home() {
                 <p className="text-gray-600 leading-relaxed">{f.desc}</p>
               </div>
             ))}
+          </div>
+
+          {/* Real-time Stats */}
+          <div className="bg-blue-600 rounded-3xl p-10 text-white relative overflow-hidden">
+            <div className="relative z-10 grid md:grid-cols-4 gap-8 text-center">
+              <div>
+                <div className="text-4xl font-black mb-2">24/7</div>
+                <div className="text-blue-100 text-sm">Xizmat vaqti</div>
+              </div>
+              <div>
+                <div className="text-4xl font-black mb-2">150+</div>
+                <div className="text-blue-100 text-sm">Malakali shifokorlar</div>
+              </div>
+              <div>
+                <div className="text-4xl font-black mb-2">12 min</div>
+                <div className="text-blue-100 text-sm">O'rtacha kutish</div>
+              </div>
+              <div>
+                <div className="text-4xl font-black mb-2">98%</div>
+                <div className="text-blue-100 text-sm">Mijozlar roziligi</div>
+              </div>
+            </div>
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+                <Sparkles size={120} />
+            </div>
           </div>
         </div>
       </section>
