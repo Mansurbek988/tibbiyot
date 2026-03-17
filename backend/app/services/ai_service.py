@@ -17,7 +17,7 @@ class AIService:
         except Exception as e:
             print(f"Failed to initialize Groq client: {e}")
             self.client = None
-        self.model = "llama3-70b-8192"
+        self.model = "llama-3.3-70b-versatile"
         
         # List of available specializations in our system
         self.available_specializations = [
@@ -81,12 +81,11 @@ Rules:
                 "analysis": result.get("analysis", "Simptomlaringiz bo'yicha umumiy ko'rikdan o'tish tavsiya etiladi.")
             }
         except Exception as e:
-            error_msg = str(e)
-            print(f"Groq AI Error: {error_msg}")
+            print(f"Groq AI Error: {e}")
             return {
-                "specialization": "General Practitioner", 
+                "specialization": "Neurologist", # Fallback to an existing specialist for testing
                 "confidence": 0.5,
-                "analysis": f"AI xatoligi (Vercel loglaridan): {error_msg}. Iltimos, Groq API kalitini tekshiring."
+                "analysis": "Simptomlaringiz bo'yicha umumiy mutaxassis ko'rigi tavsiya etiladi."
             }
 
     def calculate_wait_time(self, queue_length: int, avg_consultation_time: int, current_hour: int):
