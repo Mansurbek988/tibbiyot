@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, List
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
@@ -48,7 +48,7 @@ def get_current_user(
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-def check_role(roles: list[models.RoleEnum]):
+def check_role(roles: List[models.RoleEnum]):
     def role_checker(current_user: models.User = Depends(get_current_user)):
         # Convert roles to strings for robust comparison
         role_values = [r.value if hasattr(r, 'value') else str(r) for r in roles]
