@@ -13,6 +13,7 @@ class TriageRequest(BaseModel):
 class TriageResponse(BaseModel):
     specialization: str
     confidence: float
+    analysis: str
 
 @router.post("/triage", response_model=TriageResponse)
 def get_triage(

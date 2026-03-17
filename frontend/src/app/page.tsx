@@ -11,12 +11,13 @@ export default function Home() {
   const [symptoms, setSymptoms] = useState("");
   const [heroSearch, setHeroSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ specialization: string; confidence: number } | null>(null);
+  const [result, setResult] = useState<{ specialization: string; confidence: number; analysis: string } | null>(null);
   const router = useRouter();
 
   const handleTriage = async () => {
     if (!symptoms) return;
     setLoading(true);
+    setResult(null); // Clear previous result
     try {
       const response = await aiService.triage(symptoms);
       setResult(response.data);
@@ -136,17 +137,31 @@ export default function Home() {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-xl"
+                    className="mt-6 p-5 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl shadow-sm"
                   >
-                    <p className="text-sm text-blue-600 font-semibold mb-1">Tavsiya etilgan yo'nalish:</p>
-                    <h4 className="text-xl font-bold text-blue-900">{result.specialization}</h4>
-                    <div className="mt-2 flex items-center justify-between">
-                      <span className="text-xs text-blue-500">Ishonchlilik: {(result.confidence * 100).toFixed(0)}%</span>
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="p-2 bg-blue-600 text-white rounded-lg">
+                        <Activity size={16} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">AI Tahlili</p>
+                        <p className="text-sm text-blue-900 leading-relaxed italic">"{result.analysis}"</p>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4 border-t border-blue-100 flex flex-col gap-3">
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium">Tavsiya etilgan mutaxassis:</p>
+                        <h4 className="text-xl font-black text-blue-900">{result.specialization}</h4>
+                        <span className="text-[10px] text-blue-400 font-bold">Ishonchlilik: {(result.confidence * 100).toFixed(0)}%</span>
+                      </div>
+                      
                       <Link 
                         href={`/doctors?search=${encodeURIComponent(result.specialization)}`}
-                        className="text-sm text-blue-700 font-bold flex items-center gap-1 hover:underline cursor-pointer"
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-100 group"
                       >
-                        Mutaxassisni tanlash <ArrowRight size={14} />
+                        Mutaxassisni tanlash 
+                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                       </Link>
                     </div>
                   </motion.div>

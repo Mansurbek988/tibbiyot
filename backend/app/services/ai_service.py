@@ -49,7 +49,10 @@ class AIService:
 
 Rules:
 1. Always respond in JSON format.
-2. The JSON must contain exactly two keys: 'specialization' (string) and 'confidence' (float between 0 and 1).
+2. The JSON must contain exactly three keys: 
+   - 'specialization' (string)
+   - 'confidence' (float between 0 and 1)
+   - 'analysis' (string: a very brief diagnosis or advice in Uzbek language, e.g., 'Sizda gripp alomatlari bo'lishi mumkin. Ko'p suyuqlik ichish tavsiya etiladi.')
 3. If multiple specialists could apply, choose the most relevant primary one.
 4. If the symptoms are vague, choose 'General Practitioner'.
 5. Only use specializations from the provided list.
@@ -74,11 +77,16 @@ Rules:
                 
             return {
                 "specialization": result.get("specialization", "General Practitioner"),
-                "confidence": result.get("confidence", 0.8)
+                "confidence": result.get("confidence", 0.8),
+                "analysis": result.get("analysis", "Simptomlaringiz bo'yicha umumiy ko'rikdan o'tish tavsiya etiladi.")
             }
         except Exception as e:
             print(f"Groq AI Error: {e}")
-            return {"specialization": "General Practitioner", "confidence": 0.5}
+            return {
+                "specialization": "General Practitioner", 
+                "confidence": 0.5,
+                "analysis": "Xatolik yuz berdi, iltimos umumiy shifokorga murojaat qiling."
+            }
 
     def calculate_wait_time(self, queue_length: int, avg_consultation_time: int, current_hour: int):
         """
