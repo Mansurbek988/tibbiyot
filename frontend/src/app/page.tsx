@@ -20,8 +20,9 @@ export default function Home() {
     try {
       const response = await aiService.triage(symptoms);
       setResult(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Triage error:", error);
+      alert(error.response?.data?.detail || "AI tahlilida xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko'ring.");
     } finally {
       setLoading(false);
     }
