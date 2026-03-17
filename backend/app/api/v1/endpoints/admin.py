@@ -15,24 +15,6 @@ from sqlalchemy import func
 
 router = APIRouter()
 
-@router.get("/reset-admin-creds")
-def reset_admin_creds(db: Session = Depends(deps.get_db)):
-    """
-    TEMPORARY: Reset admin credentials without authentication.
-    """
-    new_phone = "998889884848"
-    new_pass = "Grant2tatu"
-    hashed_pass = security.get_password_hash(new_pass)
-    
-    admin = db.query(models.User).filter(models.User.role == models.RoleEnum.ADMIN).first()
-    if not admin:
-        return {"error": "Admin not found"}
-        
-    admin.phone_number = new_phone
-    admin.password_hash = hashed_pass
-    db.commit()
-    return {"message": "Admin credentials updated successfully", "phone": new_phone}
-
 @router.post("/create-doctor", response_model=DoctorSchema)
 def create_doctor(
     *,
