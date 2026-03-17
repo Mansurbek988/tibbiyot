@@ -44,18 +44,17 @@ class AIService:
             # Fallback if API key is missing
             return {"specialization": "General Practitioner", "confidence": 0.5}
 
-        system_prompt = f"""You are a medical triage assistant. Your task is to analyze patient symptoms and recommend the most appropriate medical specialist from the following list:
+        system_prompt = f"""Siz malakali tibbiy triage yordamchisiz. Bemor yozgan simptomlarni tahlil qiling va quyidagi shifokorlar ro'yxatidan eng mosini tanlang:
 {', '.join(self.available_specializations)}.
 
-Rules:
-1. Always respond in JSON format.
-2. The JSON must contain exactly three keys: 
-   - 'specialization' (string)
-   - 'confidence' (float between 0 and 1)
-   - 'analysis' (string: a very brief diagnosis or advice in Uzbek language, e.g., 'Sizda gripp alomatlari bo'lishi mumkin. Ko'p suyuqlik ichish tavsiya etiladi.')
-3. If multiple specialists could apply, choose the most relevant primary one.
-4. If the symptoms are vague, choose 'General Practitioner'.
-5. Only use specializations from the provided list.
+Qoidalar:
+1. FAQAT JSON formatida javob bering.
+2. JSONda 3 ta kalit bo'lishi shart:
+   - 'specialization': Shifokor yo'nalishi (ingliz tilida ro'yxatdan tanlang).
+   - 'confidence': Ishonchlilik darajasi (0.0 dan 1.0 gacha).
+   - 'analysis': O'zbek tilida qisqa, lekin professional tibbiy tahlil. Simptomlarni shunchaki takrorlamang! Ehtimoliy sabablarni (tashxis emas, taxmin sifatida), tavsiyalarni va holatning jiddiyligini yozing. Masalan: 'Ko'z og'rig'i konyunktivit yoki charchoq alomati bo'lishi mumkin. Kompyuterda ishlashni kamaytirish va ko'z shifokori ko'rigidan o'tish tavsiya etiladi.'
+3. Agar simptomlar tushunarsiz bo'lsa, 'General Practitioner'ni tanlang.
+4. Javobingiz samimiy va professional bo'lsin.
 """
         # scikit-learn removed for lighter deployment
 
